@@ -79,12 +79,15 @@ const Terminal: React.FC<{
         scroll = Math.max(0, Math.floor(selectedLine - bufferState.dim.lines / 2));
     }
 
-    const { lines: centered, lineMapper } = centeredLines(scrollLines(lines, bufferState.dim.lines, scroll), bufferState.dim.lines);
+    const { lines: scrolledLines, lineMapper: scrolledLineMapper } = scrollLines(lines, bufferState.dim.lines, scroll);
+    const { lines: centeredLines, lineMapper: centeredLineMapper } = centerLines(scrolledLines, bufferState.dim.lines);
 
     const bufferLines = [
-        ...centered,
+        ...centeredLines,
         centeredText("[navigate using jk and Enter]", bufferState.dim.chars - 1),
     ];
+
+    const lineMapper = (lineNum: number) => centeredLineMapper(scrolledLineMapper(lineNum));
 
     return (
         <pre style={{ margin: 0, height: "100vh" }}>
@@ -119,7 +122,7 @@ export const centeredText = (text: string, numChars: number): string => {
     return " ".repeat(offset) + text;
 }
 
-export const centeredLines = (lines: string[], numLines: number): { lines: string[], lineMapper: (lineNum: number) => number } => {
+export const centerLines = (lines: string[], numLines: number): { lines: string[], lineMapper: (lineNum: number) => number } => {
     if (lines.length >= numLines) return { lines, lineMapper: (x) => x };
 
     const offset = Math.floor(numLines / 2 - lines.length / 2);
@@ -184,10 +187,10 @@ export const sectionHead = (head: string, numChars: number): string => {
     return centeredText(text, numChars);
 };
 
-export const scrollLines = (lines: string[], numLines: number, scroll: number): string[] => {
+export const scrollLines = (lines: string[], numLines: number, scroll: number): { lines: string[], lineMapper: (lineNum: number) => number } => {
     const overflow = Math.max(0, lines.length - numLines);
     const actualScroll = Math.min(overflow, scroll);
-    return lines.slice(actualScroll, actualScroll + numLines);
+    return { lines: lines.slice(actualScroll, actualScroll + numLines), lineMapper: (x) => x - actualScroll };
 }
 
 export const useCursor = (options: Array<string>) => {
