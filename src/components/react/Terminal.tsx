@@ -38,10 +38,13 @@ const Terminal: React.FC<{ render: RenderFunction, onKeyDown: (e: KeyboardEvent)
 
     const lines = useMemo(() => {
         const dims = {
-            lines: dimensions.lines,
+            lines: dimensions.lines - 1,
             chars: dimensions.chars - 1,
         };
-        return render(dims).map(line => "~" + line);
+        return [
+            ...render(dims).map(line => "~" + line),
+            "~" + centeredText("[navigate using jk and Enter]", dimensions.chars - 1),
+        ];
     }, [dimensions, render])
 
     return (
@@ -88,4 +91,26 @@ export const centeredLines = (lines: string[], numLines: number): string[] => {
     }
     return out;
 }
+
+export const paragraph = (p: string, numChars: number): string[] => {
+    let out: string[] = [];
+
+    const words = p.split(" ");
+
+    const lineWidth = 60;
+
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        const currentLine = out[out.length - 1];
+        if (currentLine !== undefined && currentLine.length + 1 + word.length < lineWidth) {
+            out[out.length - 1] += " " + word;
+        } else {
+            out.push(word);
+        }
+    }
+
+    const offset = Math.floor(numChars / 2 - lineWidth / 2)
+
+    return out.map(line => " ".repeat(offset) + line);
+};
 
