@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import type { RenderFunction } from "./Terminal";
 import Terminal, { centeredLines, centeredText, paragraph } from "./Terminal";
 

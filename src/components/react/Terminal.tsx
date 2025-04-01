@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState, type KeyboardEventHandler } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const LINE_HEIGHT = 22;
 
@@ -71,15 +71,9 @@ const getCharWidth = () => {
 };
 
 export const centeredText = (text: string, numChars: number): string => {
-    let line = "";
-
     const offset = Math.floor(numChars / 2 - text.length / 2);
-    for (let i = 0; i < numChars; i++) {
-        const char = text[i - offset] ?? ' ';
-        line += char;
-    }
 
-    return line;
+    return " ".repeat(offset) + text;
 }
 
 export const centeredLines = (lines: string[], numLines: number): string[] => {
@@ -92,25 +86,54 @@ export const centeredLines = (lines: string[], numLines: number): string[] => {
     return out;
 }
 
+const SECTION_WIDTH = 60;
+
 export const paragraph = (p: string, numChars: number): string[] => {
     let out: string[] = [];
 
+    p = p.replaceAll("\n", " __NEWLINE__ ")
     const words = p.split(" ");
-
-    const lineWidth = 60;
 
     for (let i = 0; i < words.length; i++) {
         const word = words[i];
+
+        if (word === "__NEWLINE__") {
+            out.push("");
+            continue;
+        }
+
         const currentLine = out[out.length - 1];
-        if (currentLine !== undefined && currentLine.length + 1 + word.length < lineWidth) {
+        if (currentLine !== undefined && currentLine !== "" && currentLine.length + 1 + word.length < SECTION_WIDTH) {
             out[out.length - 1] += " " + word;
         } else {
             out.push(word);
         }
     }
 
-    const offset = Math.floor(numChars / 2 - lineWidth / 2)
+    const offset = Math.floor(numChars / 2 - SECTION_WIDTH / 2)
 
     return out.map(line => " ".repeat(offset) + line);
+};
+
+export const sectionHead = (head: string, numChars: number): string => {
+    const offset = Math.floor(SECTION_WIDTH / 2 - head.length / 2);
+
+    let text = "";
+
+    for (let i = 0; i < SECTION_WIDTH; i++) {
+        if (i < offset - 1) {
+            text += "#";
+        } else if (i === offset - 1) {
+            text += " ";
+        } else if (i < offset + head.length) {
+            text += head[i - offset];
+        } else if (i === offset + head.length) {
+            text += " ";
+        } else {
+            text += "#";
+        }
+    }
+
+    return centeredText(text, numChars);
 };
 
