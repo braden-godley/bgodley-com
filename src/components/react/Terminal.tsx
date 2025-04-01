@@ -81,10 +81,6 @@ const Terminal: React.FC<{
 
     const { lines: centered, lineMapper } = centeredLines(scrollLines(lines, bufferState.dim.lines, scroll), bufferState.dim.lines);
 
-    if (selectedLine !== null) {
-        console.log("mapped to ", lineMapper(selectedLine));
-    }
-
     const bufferLines = [
         ...centered,
         centeredText("[navigate using jk and Enter]", bufferState.dim.chars - 1),

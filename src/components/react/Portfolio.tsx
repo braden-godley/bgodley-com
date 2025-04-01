@@ -78,8 +78,6 @@ const Portfolio = () => {
 
         const selectedLine = optionsByLine[cursor];
 
-        console.log(cursor, selectedLine);
-
         return { lines, selectedLine };
     }, [cursor]);
 
