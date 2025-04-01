@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import type { BufferDispatch, BufferState, RenderFunction } from "./Terminal";
-import Terminal, { centeredText, paragraph, useCursor } from "./Terminal";
+import Terminal, { asciiArtText, centeredText, paragraph, useCursor } from "./Terminal";
 
 const BUTTONS = [
     { id: "portfolio", label: "See my Portfolio", href: "/portfolio" },
@@ -14,7 +14,7 @@ const About = () => {
 
     const render: RenderFunction = useCallback((bufferState) => {
         const lines = [
-            centeredText("ABOUT", bufferState.dim.chars),
+            ...asciiArtText("ABOUT", bufferState.dim.chars),
             "",
             ...paragraph("I'm Braden Godley, a software engineer based in Portland, OR. Focused primarily on full stack development, but I'm also interested in cybersecurity and DevOps.", bufferState.dim.chars),
             "",

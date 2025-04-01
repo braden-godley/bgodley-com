@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import type { BufferDispatch, BufferState, RenderFunction } from "./Terminal";
-import Terminal, { centeredText, paragraph, sectionHead, useCursor } from "./Terminal";
+import Terminal, { asciiArtText, centeredText, paragraph, sectionHead, useCursor } from "./Terminal";
 
 type Project = {
     id: string,
@@ -49,8 +49,7 @@ const Portfolio = () => {
 
     const render: RenderFunction = useCallback((bufferState) => {
         let lines = [
-            "",
-            centeredText("PORTFOLIO", bufferState.dim.chars),
+            ...asciiArtText("PORTFOLIO", bufferState.dim.chars),
             "",
         ];
 

@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import type { BufferDispatch, BufferState, RenderFunction } from "./Terminal";
-import Terminal, { centeredText, useCursor } from "./Terminal";
+import Terminal, { asciiArtText, centeredText, useCursor } from "./Terminal";
 
 const BUTTONS = [
     { id: "about", label: "About", href: "/about" },
@@ -15,9 +15,9 @@ const Homepage = () => {
 
     const render: RenderFunction = useCallback((bufferState) => {
         let lines = [
-            centeredText("Braden Godley", bufferState.dim.chars),
+            ...asciiArtText("Braden Godley", bufferState.dim.chars),
             "",
-            centeredText("Welcome to my homepage", bufferState.dim.chars),
+            centeredText("", bufferState.dim.chars),
             "",
         ];
 
