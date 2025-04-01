@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import type { BufferDispatch, BufferState, RenderFunction } from "./Terminal";
 import Terminal, { asciiArtText, centeredText, paragraph, sectionHead, useCursor } from "./Terminal";
 
@@ -32,11 +32,41 @@ Behind the scenes, the application uses ChatGPT not only for generating the stor
         href: "https://adventurechat.app/",
     },
     {
-        id: "fredericksburg-bbq",
-        title: "Fredericksburg BBQ Cleaning",
-        description: `Created a professional business website for a fictional BBQ cleaning business in Fredericksburg. The website is built using Next.js and follows responsive web design principles.`,
-        href: "https://fredericksburg-bbq.vercel.app/",
+        id: "hop-on-bro",
+        title: "Hop On, Bro",
+        description: `A website that allows you to generate AI messages to plead for your friends to join your game. Allows you to use many different styles (Mark Twain, Alpha Male Influencer, Marketing Email, etc.) and tones (Jealous, Flirty, Guilt Trippy, etc.)`,
+        href: "https://hop-on-bro.vercel.app/",
     },
+    {
+        id: "equation-crypt",
+        title: "A custom encryption algorithm that uses equations to encrypt messages",
+        description: `Encrypt/decrypt a string using a custom float equation!`,
+        href: "https://github.com/braden-godley/equation-crypt",
+    },
+    {
+        id: "fastdict",
+        title: "FastDict",
+        description: "A very fast dictionary made with Laravel. Lets you look up words without having to click around a bunch and get pulled out of your flow.",
+        href: "https://fastdict.bgodley.com/",
+    },
+    {
+        id: "thebestcolorever",
+        title: "The Best Color Ever",
+        description: "A website that crowdsources votes by comparing two colors. Eventually, the leaderboard will converge on the best color ever.",
+        href: "https://thebestcolorever.com/",
+    },
+    {
+        id: "rustis",
+        title: "Rustis",
+        description: "Rustis is a Rust-based implementation of a subset of Redis's functionality. It provides an executable that can be used to start a server or issue commands to a server as a client.",
+        href: "https://github.com/braden-godley/rustis",
+    },
+    {
+        id: "illugens",
+        title: "Illugens",
+        description: `IlluGens is a website that allows users to generate Stable Diffusion images that have an illusion baked into them. Users can place text or images in a canvas which is then used as a "stencil" for the illusion that is generated.`,
+        href: "https://github.com/braden-godley/illugens",
+    }
 ];
 
 const OPTIONS = [
@@ -88,7 +118,7 @@ const Portfolio = () => {
         } else if (e.key === 'Enter') {
             const project = PROJECTS.find(project => project.id === cursor);
             if (project) {
-                window.location.href = project.href;
+                window.open(project.href, '_blank');
             } else if (cursor === "back") {
                 window.location.href = "/";
             }
