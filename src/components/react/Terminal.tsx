@@ -137,3 +137,12 @@ export const sectionHead = (head: string, numChars: number): string => {
     return centeredText(text, numChars);
 };
 
+export const useCursor = (options: Array<string>) => {
+    const [cursor, setCursorRaw] = useState(0);
+
+    const next = () => setCursorRaw((cursor) => (cursor + 1) % options.length);
+    const prev = () => setCursorRaw((cursor) => (cursor - 1 + options.length) % options.length);
+    const setCursor = (option: string) => setCursorRaw(options.indexOf(option));
+
+    return { cursor: options[cursor], next, prev, setCursor };
+}

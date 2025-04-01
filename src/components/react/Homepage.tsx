@@ -1,15 +1,15 @@
 import { useCallback, useState } from "react";
 import type { RenderFunction } from "./Terminal";
-import Terminal, { centeredLines, centeredText } from "./Terminal";
+import Terminal, { centeredLines, centeredText, useCursor } from "./Terminal";
 
 const BUTTONS = [
-    { label: "About", href: "/about" },
-    { label: "Portfolio", href: "/portfolio" },
-    { label: "Configs", href: "/configs" },
+    { id: "about", label: "About", href: "/about" },
+    { id: "portfolio", label: "Portfolio", href: "/portfolio" },
+    { id: "configs", label: "Configs", href: "/configs" },
 ];
 
 const Homepage = () => {
-    const [cursor, setCursor] = useState(0);
+    const { cursor, next, prev } = useCursor(BUTTONS.map(button => button.id));
 
     const render: RenderFunction = useCallback((dimensions) => {
         const lines = [
@@ -19,7 +19,7 @@ const Homepage = () => {
             "",
 
             ...BUTTONS.map((button, i) => {
-                return centeredText((cursor === i ? '> ' : '') + button.label, dimensions.chars);
+                return centeredText((cursor === button.id ? '> ' : '') + button.label, dimensions.chars)
             })
         ];
         return centeredLines(lines, dimensions.lines);
@@ -27,11 +27,12 @@ const Homepage = () => {
 
     const onKeyDown = useCallback((e: KeyboardEvent) => {
         if (e.key === 'k') {
-            setCursor((cursor) => Math.max(0, cursor - 1));
+            prev();
         } else if (e.key === 'j') {
-            setCursor((cursor) => Math.min(BUTTONS.length - 1, cursor + 1));
+            next();
         } else if (e.key === 'Enter') {
-            window.location.href = BUTTONS[cursor].href;
+            const button = BUTTONS.find(button => button.id === cursor);
+            if (button) window.location.href = button.href;
         }
     }, [cursor]);
 

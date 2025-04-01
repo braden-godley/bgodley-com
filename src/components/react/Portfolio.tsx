@@ -1,8 +1,9 @@
 import { useCallback, useState } from "react";
 import type { RenderFunction } from "./Terminal";
-import Terminal, { centeredLines, centeredText, paragraph, sectionHead } from "./Terminal";
+import Terminal, { centeredLines, centeredText, paragraph, sectionHead, useCursor } from "./Terminal";
 
 type Project = {
+    id: string,
     title: string,
     description: string,
     href: string,
@@ -10,6 +11,7 @@ type Project = {
 
 const PROJECTS: Array<Project> = [
     {
+        id: "noticeflow",
         title: "NoticeFlow",
         description: `NoticeFlow is an open-source and free web application designed to help universities and other organizations handle DMCA complaints.
 I designed NoticeFlow because I didn’t want to maintain our Perl based in-house solution to handling DMCA notices. I hope that this application can provide an alternative to in-house solutions for this problem.`,
@@ -17,8 +19,13 @@ I designed NoticeFlow because I didn’t want to maintain our Perl based in-hous
     },
 ];
 
+const OPTIONS = [
+    ...PROJECTS.map(project => project.id),
+    "back",
+];
+
 const Portfolio = () => {
-    const [cursor, setCursor] = useState(0);
+    const { cursor, next, prev } = useCursor(OPTIONS);
 
     const render: RenderFunction = useCallback((dimensions) => {
         let lines = [
@@ -33,13 +40,13 @@ const Portfolio = () => {
                 "",
                 ...paragraph(project.description, dimensions.chars),
                 "",
-                centeredText((cursor === i ? "> " : "") + "View project", dimensions.chars),
+                centeredText((cursor === project.id ? "> " : "") + "View project", dimensions.chars),
             ]);
         }
 
         lines = lines.concat([
             "",
-            centeredText((cursor === PROJECTS.length ? "> " : "") + "Back", dimensions.chars),
+            centeredText((cursor === "back" ? "> " : "") + "Back", dimensions.chars),
         ]);
 
         return centeredLines(lines, dimensions.lines);
@@ -47,13 +54,14 @@ const Portfolio = () => {
 
     const onKeyDown = useCallback((e: KeyboardEvent) => {
         if (e.key === 'k') {
-            setCursor((cursor) => (cursor - 1 + PROJECTS.length + 1) % (PROJECTS.length + 1));
+            prev();
         } else if (e.key === 'j') {
-            setCursor((cursor) => (cursor + 1 + PROJECTS.length + 1) % (PROJECTS.length + 1));
+            next();
         } else if (e.key === 'Enter') {
-            if (cursor < PROJECTS.length) {
-                window.location.href = PROJECTS[cursor].href;
-            } else {
+            const project = PROJECTS.find(project => project.id === cursor);
+            if (project) {
+                window.location.href = project.href;
+            } else if (cursor === "back") {
                 window.location.href = "/";
             }
         }
