@@ -1,14 +1,16 @@
 import { useCallback, useState } from "react";
 import type { BufferDispatch, BufferState, RenderFunction } from "./Terminal";
-import Terminal, { centeredLines, centeredText, paragraph, useCursor } from "./Terminal";
+import Terminal, { centeredText, paragraph, useCursor } from "./Terminal";
 
 const BUTTONS = [
     { id: "portfolio", label: "See my Portfolio", href: "/portfolio" },
     { id: "back", label: "Back", href: "/" },
 ];
 
+const OPTIONS = BUTTONS.map(button => button.id);
+
 const About = () => {
-    const { cursor, next, prev } = useCursor(BUTTONS.map(button => button.id));
+    const { cursor, next, prev } = useCursor(OPTIONS);
 
     const render: RenderFunction = useCallback((bufferState) => {
         const lines = [
@@ -18,12 +20,17 @@ const About = () => {
             "",
             ...paragraph("If you're interested in seeing some of my work, check out my portfolio", bufferState.dim.chars),
             "",
-
-            ...BUTTONS.map(button => {
-                return (cursor === button.id ? '> ' : '') + button.label
-            }).map(button => centeredText(button, bufferState.dim.chars))
         ];
-        return lines;
+
+        const optionsByLine: Record<string, number> = {};
+
+        for (let i = 0; i < BUTTONS.length; i++) {
+            const button = BUTTONS[i];
+            optionsByLine[button.id] = lines.length;
+            lines.push(centeredText((cursor === button.id ? '> ' : '') + button.label, bufferState.dim.chars))
+        }
+
+        return { lines, selectedLine: optionsByLine[cursor] };
     }, [cursor]);
 
     const onKeyDown = useCallback((_bufferState: BufferState, _dispatch: BufferDispatch) => (e: KeyboardEvent) => {

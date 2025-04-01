@@ -2,7 +2,10 @@ import React, { useEffect, useMemo, useReducer, useState } from "react";
 
 const LINE_HEIGHT = 22;
 
-export type RenderFunction = (bufferState: BufferState) => string[];
+export type RenderFunction = (bufferState: BufferState) => {
+    lines: string[],
+    selectedLine: number | null,
+};
 
 export type Dimensions = {
     lines: number,
@@ -11,7 +14,6 @@ export type Dimensions = {
 
 export type BufferState = {
     dim: Dimensions,
-    scroll: number,
 };
 
 type BufferAction = {
@@ -26,27 +28,23 @@ export type BufferDispatch = (action: BufferAction) => void;
 
 const initialState: BufferState = {
     dim: { lines: 60, chars: 150 },
-    scroll: 0,
 };
 
 const bufferReducer = (state: BufferState, action: BufferAction): BufferState => {
     if (action.type === "SET_DIM") {
         return {
             ...state,
-            scroll: Math.max(0, Math.min(action.payload.lines, state.scroll)),
             dim: action.payload,
-        };
-    } else if (action.type === "SET_SCROLL") {
-        return {
-            ...state,
-            scroll: Math.max(0, Math.min(state.dim.lines, action.payload)),
         };
     } else {
         return state;
     }
 };
 
-const Terminal: React.FC<{ render: RenderFunction, onKeyDown: (bufferState: BufferState, dispatch: BufferDispatch) => (e: KeyboardEvent) => void }> = ({ render, onKeyDown }) => {
+const Terminal: React.FC<{
+    render: RenderFunction,
+    onKeyDown: (bufferState: BufferState, dispatch: BufferDispatch) => (e: KeyboardEvent) => void,
+}> = ({ render, onKeyDown }) => {
     const [bufferState, dispatch] = useReducer(bufferReducer, initialState);
     const [charWidth, setCharWidth] = useState(11);
 
@@ -74,16 +72,27 @@ const Terminal: React.FC<{ render: RenderFunction, onKeyDown: (bufferState: Buff
         };
     }, [onKeyDown, bufferState, dispatch]);
 
-    const renderedLines = useMemo(() => render(bufferState).map(line => "~" + line), [bufferState, render]);
+    const { lines, selectedLine } = useMemo(() => render(bufferState), [bufferState, render]);
 
-    const lines = [
-        ...scrollLines(renderedLines, bufferState.dim.lines, bufferState.scroll),
-        "~" + centeredText("[navigate using jk and Enter]", bufferState.dim.chars - 1),
+    let scroll = 0;
+    if (selectedLine !== null) {
+        scroll = Math.max(0, Math.floor(selectedLine - bufferState.dim.lines / 2));
+    }
+
+    const { lines: centered, lineMapper } = centeredLines(scrollLines(lines, bufferState.dim.lines, scroll), bufferState.dim.lines);
+
+    if (selectedLine !== null) {
+        console.log("mapped to ", lineMapper(selectedLine));
+    }
+
+    const bufferLines = [
+        ...centered,
+        centeredText("[navigate using jk and Enter]", bufferState.dim.chars - 1),
     ];
 
     return (
         <pre style={{ margin: 0, height: "100vh" }}>
-            {lines.map((line, i) => <div style={{ height: LINE_HEIGHT }} key={i}>{line}</div>)}
+            {bufferLines.map((line, i) => <div data-line={i} style={{ height: LINE_HEIGHT }} key={i}>~<span style={{ color: (selectedLine !== null && i === lineMapper(selectedLine)) ? "blue" : undefined }}>{line}</span></div>)}
         </pre>
     )
 };
@@ -110,16 +119,18 @@ export const centeredText = (text: string, numChars: number): string => {
     return " ".repeat(offset) + text;
 }
 
-export const centeredLines = (lines: string[], numLines: number): string[] => {
-    if (lines.length >= numLines) return lines;
+export const centeredLines = (lines: string[], numLines: number): { lines: string[], lineMapper: (lineNum: number) => number } => {
+    if (lines.length >= numLines) return { lines, lineMapper: (x) => x };
+
+    const offset = Math.floor(numLines / 2 - lines.length / 2);
+    const lineMapper = (lineNum: number) => lineNum + offset;
 
     let out: string[] = [];
-    const offset = Math.floor(numLines / 2 - lines.length / 2);
     for (let i = 0; i < numLines; i++) {
         const line = lines[i - offset] ?? '';
         out.push(line);
     }
-    return out;
+    return { lines: out, lineMapper };
 }
 
 const SECTION_WIDTH = 80;

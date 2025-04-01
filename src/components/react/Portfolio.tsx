@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import type { BufferDispatch, BufferState, RenderFunction } from "./Terminal";
-import Terminal, { centeredLines, centeredText, paragraph, sectionHead, useCursor } from "./Terminal";
+import Terminal, { centeredText, paragraph, sectionHead, useCursor } from "./Terminal";
 
 type Project = {
     id: string,
@@ -49,6 +49,7 @@ const Portfolio = () => {
 
     const render: RenderFunction = useCallback((bufferState) => {
         let lines = [
+            "",
             centeredText("PORTFOLIO", bufferState.dim.chars),
             "",
         ];
@@ -57,7 +58,6 @@ const Portfolio = () => {
 
         for (let i = 0; i < PROJECTS.length; i++) {
             const project = PROJECTS[i];
-            optionsByLine[project.id] = lines.length;
             lines = lines.concat([
                 sectionHead(project.title.toUpperCase(), bufferState.dim.chars),
                 "",
@@ -66,14 +66,21 @@ const Portfolio = () => {
                 centeredText((cursor === project.id ? "> " : "") + "View project", bufferState.dim.chars),
                 "",
             ]);
+            optionsByLine[project.id] = lines.length - 2;
         }
 
+        optionsByLine["back"] = lines.length + 1;
         lines = lines.concat([
             "",
             centeredText((cursor === "back" ? "> " : "") + "Back", bufferState.dim.chars),
+            "",
         ]);
 
-        return lines;
+        const selectedLine = optionsByLine[cursor];
+
+        console.log(cursor, selectedLine);
+
+        return { lines, selectedLine };
     }, [cursor]);
 
     const onKeyDown = useCallback((bufferState: BufferState, dispatch: BufferDispatch) => (e: KeyboardEvent) => {
@@ -89,8 +96,6 @@ const Portfolio = () => {
                 window.location.href = "/";
             }
         }
-
-        dispatch({ type: "SET_SCROLL", payload: bufferState.scroll + 1 });
     }, [cursor]);
 
     return <Terminal render={render} onKeyDown={onKeyDown} />

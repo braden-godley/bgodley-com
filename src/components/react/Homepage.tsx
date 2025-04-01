@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import type { BufferDispatch, BufferState, RenderFunction } from "./Terminal";
-import Terminal, { centeredLines, centeredText, useCursor } from "./Terminal";
+import Terminal, { centeredText, useCursor } from "./Terminal";
 
 const BUTTONS = [
     { id: "about", label: "About", href: "/about" },
@@ -8,21 +8,28 @@ const BUTTONS = [
     { id: "configs", label: "Configs", href: "/configs" },
 ];
 
+const OPTIONS = BUTTONS.map(button => button.id);
+
 const Homepage = () => {
-    const { cursor, next, prev } = useCursor(BUTTONS.map(button => button.id));
+    const { cursor, next, prev } = useCursor(OPTIONS);
 
     const render: RenderFunction = useCallback((bufferState) => {
-        const lines = [
+        let lines = [
             centeredText("Braden Godley", bufferState.dim.chars),
             "",
             centeredText("Welcome to my homepage", bufferState.dim.chars),
             "",
-
-            ...BUTTONS.map(button => {
-                return centeredText((cursor === button.id ? '> ' : '') + button.label, bufferState.dim.chars)
-            })
         ];
-        return lines;
+
+        const optionsByLine: Record<string, number> = {};
+
+        for (let i = 0; i < BUTTONS.length; i++) {
+            const button = BUTTONS[i];
+            optionsByLine[button.id] = lines.length;
+            lines.push(centeredText((cursor === button.id ? '> ' : '') + button.label, bufferState.dim.chars))
+        }
+
+        return { lines, selectedLine: optionsByLine[cursor] };
     }, [cursor]);
 
     const onKeyDown = useCallback((_bufferState: BufferState, _dispatch: BufferDispatch) => (e: KeyboardEvent) => {
