@@ -24,6 +24,11 @@ const BUTTONS = [
         href: "https://github.com/braden-godley/dotfiles/blob/main/alacritty.toml",
     },
     {
+        id: "cursor-settings",
+        label: "Cursor settings",
+        href: "https://github.com/braden-godley/dotfiles/blob/main/cursor-settings.json",
+    },
+    {
         id: "back",
         label: "Back",
         href: "/"

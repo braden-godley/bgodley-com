@@ -82,12 +82,23 @@ const Terminal: React.FC<{
     const { lines: scrolledLines, lineMapper: scrolledLineMapper } = scrollLines(lines, bufferState.dim.lines, scroll);
     const { lines: centeredLines, lineMapper: centeredLineMapper } = centerLines(scrolledLines, bufferState.dim.lines);
 
+    const lineMapper = (lineNum: number) => centeredLineMapper(scrolledLineMapper(lineNum));
+
+    // Calculate percentage through the buffer
+    const calculatePercentage = () => {
+        if (lines.length <= bufferState.dim.lines) return "All";
+        const percentage = Math.floor((scroll / (lines.length - bufferState.dim.lines)) * 100);
+        if (percentage === 0) return "Top";
+        if (percentage >= 100) return "Bot";
+        return `${percentage}%`;
+    };
+
+    const statusLine = `--${calculatePercentage()}-- [navigate using jk and Enter]`;
+
     const bufferLines = [
         ...centeredLines,
-        centeredText("[navigate using jk and Enter]", bufferState.dim.chars - 1),
+        centeredText(statusLine, bufferState.dim.chars - 1),
     ];
-
-    const lineMapper = (lineNum: number) => centeredLineMapper(scrolledLineMapper(lineNum));
 
     return (
         <pre style={{ margin: 0, height: "100vh" }}>
