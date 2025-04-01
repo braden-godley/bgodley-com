@@ -22,7 +22,7 @@ const Homepage = () => {
                 return centeredText((cursor === button.id ? '> ' : '') + button.label, bufferState.dim.chars)
             })
         ];
-        return centeredLines(lines, bufferState.dim.lines);
+        return lines;
     }, [cursor]);
 
     const onKeyDown = useCallback((_bufferState: BufferState, _dispatch: BufferDispatch) => (e: KeyboardEvent) => {

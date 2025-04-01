@@ -53,8 +53,11 @@ const Portfolio = () => {
             "",
         ];
 
+        const optionsByLine: Record<string, number> = {};
+
         for (let i = 0; i < PROJECTS.length; i++) {
             const project = PROJECTS[i];
+            optionsByLine[project.id] = lines.length;
             lines = lines.concat([
                 sectionHead(project.title.toUpperCase(), bufferState.dim.chars),
                 "",
@@ -70,7 +73,7 @@ const Portfolio = () => {
             centeredText((cursor === "back" ? "> " : "") + "Back", bufferState.dim.chars),
         ]);
 
-        return centeredLines(lines, bufferState.dim.lines);
+        return lines;
     }, [cursor]);
 
     const onKeyDown = useCallback((bufferState: BufferState, dispatch: BufferDispatch) => (e: KeyboardEvent) => {

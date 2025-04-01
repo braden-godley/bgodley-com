@@ -23,7 +23,7 @@ const About = () => {
                 return (cursor === button.id ? '> ' : '') + button.label
             }).map(button => centeredText(button, bufferState.dim.chars))
         ];
-        return centeredLines(lines, bufferState.dim.lines);
+        return lines;
     }, [cursor]);
 
     const onKeyDown = useCallback((_bufferState: BufferState, _dispatch: BufferDispatch) => (e: KeyboardEvent) => {

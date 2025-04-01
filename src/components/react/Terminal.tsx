@@ -74,12 +74,12 @@ const Terminal: React.FC<{ render: RenderFunction, onKeyDown: (bufferState: Buff
         };
     }, [onKeyDown, bufferState, dispatch]);
 
+    const renderedLines = useMemo(() => render(bufferState).map(line => "~" + line), [bufferState, render]);
+
     const lines = [
-        ...scrollLines(render(bufferState).map(line => "~" + line), bufferState.dim.lines, bufferState.scroll),
+        ...scrollLines(renderedLines, bufferState.dim.lines, bufferState.scroll),
         "~" + centeredText("[navigate using jk and Enter]", bufferState.dim.chars - 1),
     ];
-
-    console.log("tests");
 
     return (
         <pre style={{ margin: 0, height: "100vh" }}>
