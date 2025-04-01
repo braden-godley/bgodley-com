@@ -27,7 +27,7 @@ type BufferAction = {
 export type BufferDispatch = (action: BufferAction) => void;
 
 const initialState: BufferState = {
-    dim: { lines: 60, chars: 150 },
+    dim: { lines: 50, chars: 150 },
 };
 
 const bufferReducer = (state: BufferState, action: BufferAction): BufferState => {
