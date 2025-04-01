@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { RenderFunction } from "./Terminal";
+import type { BufferDispatch, BufferState, RenderFunction } from "./Terminal";
 import Terminal, { centeredLines, centeredText, useCursor } from "./Terminal";
 
 const BUTTONS = [
@@ -11,21 +11,21 @@ const BUTTONS = [
 const Homepage = () => {
     const { cursor, next, prev } = useCursor(BUTTONS.map(button => button.id));
 
-    const render: RenderFunction = useCallback((dimensions) => {
+    const render: RenderFunction = useCallback((bufferState) => {
         const lines = [
-            centeredText("Braden Godley", dimensions.chars),
+            centeredText("Braden Godley", bufferState.dim.chars),
             "",
-            centeredText("Welcome to my homepage", dimensions.chars),
+            centeredText("Welcome to my homepage", bufferState.dim.chars),
             "",
 
-            ...BUTTONS.map((button, i) => {
-                return centeredText((cursor === button.id ? '> ' : '') + button.label, dimensions.chars)
+            ...BUTTONS.map(button => {
+                return centeredText((cursor === button.id ? '> ' : '') + button.label, bufferState.dim.chars)
             })
         ];
-        return centeredLines(lines, dimensions.lines);
+        return centeredLines(lines, bufferState.dim.lines);
     }, [cursor]);
 
-    const onKeyDown = useCallback((e: KeyboardEvent) => {
+    const onKeyDown = useCallback((_bufferState: BufferState, _dispatch: BufferDispatch) => (e: KeyboardEvent) => {
         if (e.key === 'k') {
             prev();
         } else if (e.key === 'j') {

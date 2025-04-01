@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { RenderFunction } from "./Terminal";
+import type { BufferDispatch, BufferState, RenderFunction } from "./Terminal";
 import Terminal, { centeredLines, centeredText, paragraph, sectionHead, useCursor } from "./Terminal";
 
 type Project = {
@@ -17,6 +17,26 @@ const PROJECTS: Array<Project> = [
 I designed NoticeFlow because I didn’t want to maintain our Perl based in-house solution to handling DMCA notices. I hope that this application can provide an alternative to in-house solutions for this problem.`,
         href: "https://noticeflow.com",
     },
+    {
+        id: "secret-exchange",
+        title: "WebStrata Secret Exchange",
+        description: `I had the pleasure of designing and coding a web application for WebStrata Internet Services that allows them to securely exchange secrets and credentials with web hosting clients.`,
+        href: "https://secret.webstrata.com/",
+    },
+    {
+        id: "adventure-chat",
+        title: "Adventure Chat",
+        description: `Adventure Chat is a next-generation choose your own adventure game that uses ChatGPT to create unique stories.
+You choose a character to play as and the chatbot will generate a scenario for you to take part in. The story evolves as you take actions, allowing for a unique experience every time.
+Behind the scenes, the application uses ChatGPT not only for generating the story, but also for validating and categorizing user inputs`,
+        href: "https://adventurechat.app/",
+    },
+    {
+        id: "fredericksburg-bbq",
+        title: "Fredericksburg BBQ Cleaning",
+        description: `Created a professional business website for a fictional BBQ cleaning business in Fredericksburg. The website is built using Next.js and follows responsive web design principles.`,
+        href: "https://fredericksburg-bbq.vercel.app/",
+    },
 ];
 
 const OPTIONS = [
@@ -27,32 +47,33 @@ const OPTIONS = [
 const Portfolio = () => {
     const { cursor, next, prev } = useCursor(OPTIONS);
 
-    const render: RenderFunction = useCallback((dimensions) => {
+    const render: RenderFunction = useCallback((bufferState) => {
         let lines = [
-            centeredText("PORTFOLIO", dimensions.chars),
+            centeredText("PORTFOLIO", bufferState.dim.chars),
             "",
         ];
 
         for (let i = 0; i < PROJECTS.length; i++) {
             const project = PROJECTS[i];
             lines = lines.concat([
-                sectionHead(project.title.toUpperCase(), dimensions.chars),
+                sectionHead(project.title.toUpperCase(), bufferState.dim.chars),
                 "",
-                ...paragraph(project.description, dimensions.chars),
+                ...paragraph(project.description, bufferState.dim.chars),
                 "",
-                centeredText((cursor === project.id ? "> " : "") + "View project", dimensions.chars),
+                centeredText((cursor === project.id ? "> " : "") + "View project", bufferState.dim.chars),
+                "",
             ]);
         }
 
         lines = lines.concat([
             "",
-            centeredText((cursor === "back" ? "> " : "") + "Back", dimensions.chars),
+            centeredText((cursor === "back" ? "> " : "") + "Back", bufferState.dim.chars),
         ]);
 
-        return centeredLines(lines, dimensions.lines);
+        return centeredLines(lines, bufferState.dim.lines);
     }, [cursor]);
 
-    const onKeyDown = useCallback((e: KeyboardEvent) => {
+    const onKeyDown = useCallback((bufferState: BufferState, dispatch: BufferDispatch) => (e: KeyboardEvent) => {
         if (e.key === 'k') {
             prev();
         } else if (e.key === 'j') {
@@ -65,6 +86,8 @@ const Portfolio = () => {
                 window.location.href = "/";
             }
         }
+
+        dispatch({ type: "SET_SCROLL", payload: bufferState.scroll + 1 });
     }, [cursor]);
 
     return <Terminal render={render} onKeyDown={onKeyDown} />

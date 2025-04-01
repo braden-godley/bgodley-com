@@ -1,16 +1,53 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useState } from "react";
 
 const LINE_HEIGHT = 22;
 
-export type RenderFunction = (dimensions: Dimensions) => string[];
+export type RenderFunction = (bufferState: BufferState) => string[];
 
 export type Dimensions = {
     lines: number,
     chars: number,
 };
 
-const Terminal: React.FC<{ render: RenderFunction, onKeyDown: (e: KeyboardEvent) => void }> = ({ render, onKeyDown }) => {
-    const [dimensions, setDimensions] = useState<Dimensions>({ lines: 60, chars: 150 });
+export type BufferState = {
+    dim: Dimensions,
+    scroll: number,
+};
+
+type BufferAction = {
+    type: "SET_DIM",
+    payload: Dimensions,
+} | {
+    type: "SET_SCROLL",
+    payload: number,
+};
+
+export type BufferDispatch = (action: BufferAction) => void;
+
+const initialState: BufferState = {
+    dim: { lines: 60, chars: 150 },
+    scroll: 0,
+};
+
+const bufferReducer = (state: BufferState, action: BufferAction): BufferState => {
+    if (action.type === "SET_DIM") {
+        return {
+            ...state,
+            scroll: Math.max(0, Math.min(action.payload.lines, state.scroll)),
+            dim: action.payload,
+        };
+    } else if (action.type === "SET_SCROLL") {
+        return {
+            ...state,
+            scroll: Math.max(0, Math.min(state.dim.lines, action.payload)),
+        };
+    } else {
+        return state;
+    }
+};
+
+const Terminal: React.FC<{ render: RenderFunction, onKeyDown: (bufferState: BufferState, dispatch: BufferDispatch) => (e: KeyboardEvent) => void }> = ({ render, onKeyDown }) => {
+    const [bufferState, dispatch] = useReducer(bufferReducer, initialState);
     const [charWidth, setCharWidth] = useState(11);
 
     useEffect(() => {
@@ -18,9 +55,9 @@ const Terminal: React.FC<{ render: RenderFunction, onKeyDown: (e: KeyboardEvent)
         const body = document.body;
         const resizeListener = () => {
             const box = body.getBoundingClientRect();
-            const lines = Math.floor(box.height / LINE_HEIGHT);
-            const chars = Math.floor(box.width / charWidth);
-            setDimensions({ lines, chars });
+            const lines = Math.floor(box.height / LINE_HEIGHT) - 1;
+            const chars = Math.floor(box.width / charWidth) - 1;
+            dispatch({ type: "SET_DIM", payload: { lines, chars } });
         };
         window.addEventListener("resize", resizeListener);
         resizeListener();
@@ -30,22 +67,19 @@ const Terminal: React.FC<{ render: RenderFunction, onKeyDown: (e: KeyboardEvent)
     }, [])
 
     useEffect(() => {
-        window.addEventListener("keydown", onKeyDown);
+        const fn = onKeyDown(bufferState, dispatch);
+        window.addEventListener("keydown", fn);
         return () => {
-            window.removeEventListener("keydown", onKeyDown);
+            window.removeEventListener("keydown", fn);
         };
-    }, [onKeyDown]);
+    }, [onKeyDown, bufferState, dispatch]);
 
-    const lines = useMemo(() => {
-        const dims = {
-            lines: dimensions.lines - 1,
-            chars: dimensions.chars - 1,
-        };
-        return [
-            ...render(dims).map(line => "~" + line),
-            "~" + centeredText("[navigate using jk and Enter]", dimensions.chars - 1),
-        ];
-    }, [dimensions, render]);
+    const lines = [
+        ...scrollLines(render(bufferState).map(line => "~" + line), bufferState.dim.lines, bufferState.scroll),
+        "~" + centeredText("[navigate using jk and Enter]", bufferState.dim.chars - 1),
+    ];
+
+    console.log("tests");
 
     return (
         <pre style={{ margin: 0, height: "100vh" }}>
@@ -71,12 +105,14 @@ const getCharWidth = () => {
 };
 
 export const centeredText = (text: string, numChars: number): string => {
-    const offset = Math.floor(numChars / 2 - text.length / 2);
+    const offset = Math.max(0, Math.floor(numChars / 2 - text.length / 2));
 
     return " ".repeat(offset) + text;
 }
 
 export const centeredLines = (lines: string[], numLines: number): string[] => {
+    if (lines.length >= numLines) return lines;
+
     let out: string[] = [];
     const offset = Math.floor(numLines / 2 - lines.length / 2);
     for (let i = 0; i < numLines; i++) {
@@ -86,7 +122,7 @@ export const centeredLines = (lines: string[], numLines: number): string[] => {
     return out;
 }
 
-const SECTION_WIDTH = 60;
+const SECTION_WIDTH = 80;
 
 export const paragraph = (p: string, numChars: number): string[] => {
     let out: string[] = [];
@@ -110,7 +146,7 @@ export const paragraph = (p: string, numChars: number): string[] => {
         }
     }
 
-    const offset = Math.floor(numChars / 2 - SECTION_WIDTH / 2)
+    const offset = Math.max(0, Math.floor(numChars / 2 - SECTION_WIDTH / 2));
 
     return out.map(line => " ".repeat(offset) + line);
 };
@@ -136,6 +172,12 @@ export const sectionHead = (head: string, numChars: number): string => {
 
     return centeredText(text, numChars);
 };
+
+export const scrollLines = (lines: string[], numLines: number, scroll: number): string[] => {
+    const overflow = Math.max(0, lines.length - numLines);
+    const actualScroll = Math.min(overflow, scroll);
+    return lines.slice(actualScroll, actualScroll + numLines);
+}
 
 export const useCursor = (options: Array<string>) => {
     const [cursor, setCursorRaw] = useState(0);
