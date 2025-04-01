@@ -15,7 +15,7 @@ const Terminal: React.FC<{ render: RenderFunction, onKeyDown: (e: KeyboardEvent)
 
     useEffect(() => {
         setCharWidth(getCharWidth());
-        const body = document.body
+        const body = document.body;
         const resizeListener = () => {
             const box = body.getBoundingClientRect();
             const lines = Math.floor(box.height / LINE_HEIGHT);
@@ -25,8 +25,8 @@ const Terminal: React.FC<{ render: RenderFunction, onKeyDown: (e: KeyboardEvent)
         window.addEventListener("resize", resizeListener);
         resizeListener();
         return () => {
-            window.removeEventListener("resize", resizeListener)
-        }
+            window.removeEventListener("resize", resizeListener);
+        };
     }, [])
 
     useEffect(() => {
@@ -45,7 +45,7 @@ const Terminal: React.FC<{ render: RenderFunction, onKeyDown: (e: KeyboardEvent)
             ...render(dims).map(line => "~" + line),
             "~" + centeredText("[navigate using jk and Enter]", dimensions.chars - 1),
         ];
-    }, [dimensions, render])
+    }, [dimensions, render]);
 
     return (
         <pre style={{ margin: 0, height: "100vh" }}>
