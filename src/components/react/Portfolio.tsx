@@ -34,12 +34,12 @@ Behind the scenes, the application uses ChatGPT not only for generating the stor
     {
         id: "hop-on-bro",
         title: "Hop On, Bro",
-        description: `A website that allows you to generate AI messages to plead for your friends to join your game. Allows you to use many different styles (Mark Twain, Alpha Male Influencer, Marketing Email, etc.) and tones (Jealous, Flirty, Guilt Trippy, etc.)`,
+        description: `A website that allows you to generate funny AI messages to plead for your friends to join your game. Allows you to use many different styles (Mark Twain, Alpha Male Influencer, Marketing Email, etc.) and tones (Jealous, Flirty, Guilt Trippy, etc.)`,
         href: "https://hop-on-bro.vercel.app/",
     },
     {
         id: "equation-crypt",
-        title: "A custom encryption algorithm that uses equations to encrypt messages",
+        title: "Equation Crypt",
         description: `Encrypt/decrypt a string using a custom float equation!`,
         href: "https://github.com/braden-godley/equation-crypt",
     },
@@ -94,8 +94,10 @@ const Portfolio = () => {
                 "",
                 centeredText((cursor === project.id ? "> " : "") + "View project", bufferState.dim.chars),
                 "",
+                "",
+                "",
             ]);
-            optionsByLine[project.id] = lines.length - 2;
+            optionsByLine[project.id] = lines.length - 4;
         }
 
         optionsByLine["back"] = lines.length + 1;
