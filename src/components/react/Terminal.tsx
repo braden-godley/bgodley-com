@@ -88,7 +88,11 @@ const Terminal: React.FC<{
 
     return (
         <pre style={{ margin: 0, height: "100vh" }}>
-            {bufferLines.map((line, i) => <div data-line={i} style={{ height: LINE_HEIGHT }} key={i}>~<span style={{ color: (selectedLine !== null && i === lineMapper(selectedLine)) ? "blue" : undefined }}>{line}</span></div>)}
+            {bufferLines.map((line, i) => (
+                <div data-line={i} style={{ height: LINE_HEIGHT }} key={i}>
+                    ~<span style={{ color: (selectedLine !== null && i === lineMapper(selectedLine)) ? "#AAAAFF" : undefined }}>{line}</span>
+                </div>
+            ))}
         </pre>
     )
 };
